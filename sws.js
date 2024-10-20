@@ -10,7 +10,7 @@ const JETTON_ADDRESS = process.env.JETTON_ADDRESS;
 const GAS_AMOUNT = process.env.GAS_AMOUNT;
 const TON_VALUE = process.env.MIN_VALUE
     ? process.env.MAX_VALUE
-      ? Math.floor(Math.random() * (parseInt(process.env.MAX_VALUE) - parseInt(process.env.MIN_VALUE)) + parseInt(process.env.MIN_VALUE))
+      ? Math.random() * (parseInt(process.env.MAX_VALUE) - parseInt(process.env.MIN_VALUE)) + parseInt(process.env.MIN_VALUE)
       : parseInt(process.env.MIN_VALUE) + Math.random() * (parseInt(process.env.TON_VALUE) - parseInt(process.env.MIN_VALUE)) * 2
     : process.env.TON_VALUE;
 const MNEMONIC = process.env.MNEMONIC;
