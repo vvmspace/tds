@@ -1,11 +1,12 @@
-import fs from 'fs';
-import readline from 'readline';
 import { Factory, MAINNET_FACTORY_ADDR, Asset, PoolType, ReadinessStatus } from '@dedust/sdk';
-import {Address, TonClient4, toNano, WalletContractV4, address} from '@ton/ton';
+import { Address, TonClient4, toNano, WalletContractV4 } from '@ton/ton';
 import { mnemonicToPrivateKey } from '@ton/crypto';
 import { configDotenv } from 'dotenv';
+import { resolve } from 'path';
 
-configDotenv();
+const envPath = process.argv[2] || './.env';
+configDotenv({ path: resolve(envPath) });
+
 const JETTON_ADDRESS = process.env.JETTON_ADDRESS;
 const GAS_AMOUNT = process.env.GAS_AMOUNT;
 const TON_VALUE = process.env.MIN_VALUE
@@ -56,7 +57,6 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
         })
     );
 
-
     const sender = wallet.sender(keys.secretKey);
     const amountIn = toNano(TON_VALUE); //TON value
 
@@ -65,17 +65,6 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
         amount: amountIn,
         gasAmount: toNano(GAS_AMOUNT),
     });
-
-    // swap back
-
-    // const amountOut = await pool
-    // .getSwapAmountOut(Asset.jetton(Address.parse(JETTON_ADDRESS)), TON, amountIn);
-
-    // await pool.sendSwap(sender, {
-    //     amountIn,
-    //     amountOut,
-    //     gasAmount: toNano(GAS_AMOUNT),
-    // });
 
     console.log(`Swap successful for wallet: ${walletAddress}`);
 }
