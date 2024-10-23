@@ -59,13 +59,17 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
             .then((response) => response.json())
             .then((pools) => pools.find(pool => ((pool.assets[0]?.address === JETTON_ADDRESS || pool.assets[1]?.address === JETTON_ADDRESS) && (pool.assets[0]?.address === TON.address || pool.assets[1]?.address === TON.address))))
             .then((pool)  => {
-                console.log(`Pool: ${JSON.stringify(pool, null, 2)}`);
-                return 1000000 / pool.lastPrice;
+                if (pool.lastPrice < 1) {
+                    console.log(`Price per M: ${pool.lastPrice} < 1`);
+                    return 1000000 * parseFloat(pool.lastPrice);
+                }
+                console.log(`Price per M: ${pool.lastPrice}`);
+                return 1000000 / parseFloat(pool.lastPrice);
             });
 
         if (pricePerM > parseFloat(MAX_PRICE_PER_M)) {
             console.log(`Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
-            if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+            if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && (pricePerM > parseFloat(MAX_PRICE_PER_M) * 1.1)) {
                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
             }
             process.exit(0);
