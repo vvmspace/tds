@@ -21,6 +21,11 @@ const MAX_PRICE_PER_M = process.env.MAX_PRICE_PER_M;
 const TELEGRAM_BOT_TOKEN= process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
+if (Math.random() > 1 / CHANCE) {
+    console.log('Not this time');
+    process.exit(0);
+}
+
 const tonClient = new TonClient4({
     endpoint: 'https://mainnet-v4.tonhubapi.com',
 });
@@ -45,12 +50,6 @@ async function initializeVaultAndPool() {
 }
 
 const processWallet = async (mnemonic, walletAddress, jetton) => {
-
-    if (Math.random() > 1 / CHANCE) {
-        console.log('Not this time');
-        process.exit(0);
-    }
-
 
     console.log('Fetching pools...');
     const { tonVault, pool } = await initializeVaultAndPool();
