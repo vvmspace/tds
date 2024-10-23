@@ -57,7 +57,7 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
     if (MAX_PRICE_PER_M) {
         const pricePerM = await fetch('https://api.dedust.io/v2/pools')
             .then((response) => response.json())
-            .then((pools) => pools.find(pool => (pool.assets[0]?.address === JETTON_ADDRESS || pool.assets[1]?.address === JETTON_ADDRESS)))
+            .then((pools) => pools.find(pool => ((pool.assets[0]?.address === JETTON_ADDRESS || pool.assets[1]?.address === JETTON_ADDRESS) && (pool.assets[0]?.address === TON.address || pool.assets[1]?.address === TON.address))))
             .then((pool)  => 1000000 / pool.lastPrice);
 
         if (pricePerM > parseFloat(MAX_PRICE_PER_M)) {
@@ -89,7 +89,7 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
     }).then((result) => {
         console.log(`Swap successful for wallet: ${walletAddress}`);
         console.log(`Swap result: ${JSON.stringify(result, null, 2)}`);
-        return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=Swap successful for wallet: ${walletAddress}`);
+        return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${JETTON_ADDRESS} Swap successful for wallet: ${walletAddress}`);
     }).catch((e) => {
         console.log(`Swap failed for wallet: ${walletAddress}`);
     });
