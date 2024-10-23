@@ -18,6 +18,8 @@ const MNEMONIC = process.env.MNEMONIC;
 const ADDRESS = process.env.ADDRESS;
 const CHANCE = process.env.CHANCE || 1;
 const MAX_PRICE_PER_M = process.env.MAX_PRICE_PER_M;
+const TELEGRAM_BOT_TOKEN= process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 const tonClient = new TonClient4({
     endpoint: 'https://mainnet-v4.tonhubapi.com',
@@ -61,6 +63,9 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
 
         if (pricePerM > parseFloat(MAX_PRICE_PER_M)) {
             console.log(`Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
+            if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
+            }
             process.exit(0);
         }
     }
@@ -81,6 +86,13 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
         poolAddress: pool.address,
         amount: amountIn,
         gasAmount: toNano(GAS_AMOUNT),
+        
+    }).then((result) => {
+        console.log(`Swap successful for wallet: ${walletAddress}`);
+        console.log(`Swap result: ${JSON.stringify(result, null, 2)}`);
+        return fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=Swap successful for wallet: ${walletAddress}`);
+    }).catch((e) => {
+        console.log(`Swap failed for wallet: ${walletAddress}`);
     });
 
     console.log(`Swap successful for wallet: ${walletAddress}`);
