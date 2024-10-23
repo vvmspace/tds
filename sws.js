@@ -58,7 +58,10 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
         const pricePerM = await fetch('https://api.dedust.io/v2/pools')
             .then((response) => response.json())
             .then((pools) => pools.find(pool => ((pool.assets[0]?.address === JETTON_ADDRESS || pool.assets[1]?.address === JETTON_ADDRESS) && (pool.assets[0]?.address === TON.address || pool.assets[1]?.address === TON.address))))
-            .then((pool)  => 1000000 / pool.lastPrice);
+            .then((pool)  => {
+                console.log(`Pool: ${JSON.stringify(pool, null, 2)}`);
+                return 1000000 / pool.lastPrice;
+            });
 
         if (pricePerM > parseFloat(MAX_PRICE_PER_M)) {
             console.log(`Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
