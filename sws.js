@@ -17,12 +17,7 @@ const TON_VALUE = process.env.MIN_VALUE
 const MNEMONIC = process.env.MNEMONIC;
 const ADDRESS = process.env.ADDRESS;
 const CHANCE = process.env.CHANCE || 1;
-
-console.log(`TON_VALUE: ${TON_VALUE}`);
-if (Math.random() > 1 / CHANCE) {
-    console.log('Not this time');
-    process.exit(0);
-}
+const MAX_PRICE_PER_M = process.env.MAX_PRICE_PER_M;
 
 const tonClient = new TonClient4({
     endpoint: 'https://mainnet-v4.tonhubapi.com',
@@ -48,7 +43,28 @@ async function initializeVaultAndPool() {
 }
 
 const processWallet = async (mnemonic, walletAddress, jetton) => {
+
+    if (Math.random() > 1 / CHANCE) {
+        console.log('Not this time');
+        process.exit(0);
+    }
+
+
+    console.log('Fetching pools...');
     const { tonVault, pool } = await initializeVaultAndPool();
+
+    if (MAX_PRICE_PER_M) {
+        const pricePerM = await fetch('https://api.dedust.io/v2/pools')
+            .then((response) => response.json())
+            .then((pools) => pools.find(pool => (pool.assets[0]?.address === JETTON_ADDRESS || pool.assets[1]?.address === JETTON_ADDRESS)))
+            .then((pool)  => 1000000 / pool.lastPrice);
+
+        if (pricePerM > parseFloat(MAX_PRICE_PER_M)) {
+            console.log(`Price per M: ${pricePerM} > ${MAX_PRICE_PER_M}`);
+            process.exit(0);
+        }
+    }
+
     const keys = await mnemonicToPrivateKey(mnemonic.trim().split(' '));
     const wallet = tonClient.open(
         WalletContractV4.create({
@@ -59,6 +75,7 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
 
     const sender = wallet.sender(keys.secretKey);
     const amountIn = toNano(TON_VALUE); //TON value
+
 
     await tonVault.sendSwap(sender, {
         poolAddress: pool.address,
