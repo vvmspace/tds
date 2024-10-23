@@ -16,7 +16,7 @@ const TON_VALUE = process.env.MIN_VALUE
     : process.env.TON_VALUE;
 const MNEMONIC = process.env.MNEMONIC;
 const ADDRESS = process.env.ADDRESS;
-const CHANCE = process.env.CHANCE || 1;
+const CHANCE = process.env.CHANCE ? parseInt(process.env.CHANCE) : 1;
 const MAX_PRICE_PER_M = process.env.MAX_PRICE_PER_M;
 const TELEGRAM_BOT_TOKEN= process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
