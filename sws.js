@@ -21,11 +21,6 @@ const MAX_PRICE_PER_M = process.env.MAX_PRICE_PER_M;
 const TELEGRAM_BOT_TOKEN= process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-if (Math.random() > 1 / CHANCE) {
-    console.log('Not this time');
-    process.exit(0);
-}
-
 const tonClient = new TonClient4({
     endpoint: 'https://mainnet-v4.tonhubapi.com',
 });
@@ -51,6 +46,28 @@ async function initializeVaultAndPool() {
 
 const processWallet = async (mnemonic, walletAddress, jetton) => {
 
+    const keys = await mnemonicToPrivateKey(mnemonic.trim().split(' '));
+    const wallet = tonClient.open(
+        WalletContractV4.create({
+            workchain: 0,
+            publicKey: keys.publicKey,
+        })
+    );
+
+    let contract = tonClient.open(wallet);
+
+    // Get balance
+    let balance = parseInt(`${await contract.getBalance()}`);
+    const minBalance = 7 * 1000000000 * (new Date().getTime() - 1731258236489) / 1000 / 60 / 60 / 24;
+    if (balance < minBalance) {
+        console.log(`Not enough balance: ${balance} of ${minBalance}`);
+        process.exit(0);
+    }
+    console.log(`Wallet balance: ${balance}, min balance: ${minBalance}`);
+    if (Math.random() > 1 / CHANCE) {
+        console.log('Not this time');
+        process.exit(0);
+    }
     console.log('Fetching pools...');
     const { tonVault, pool } = await initializeVaultAndPool();
 
@@ -75,14 +92,6 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
             process.exit(0);
         }
     }
-
-    const keys = await mnemonicToPrivateKey(mnemonic.trim().split(' '));
-    const wallet = tonClient.open(
-        WalletContractV4.create({
-            workchain: 0,
-            publicKey: keys.publicKey,
-        })
-    );
 
     const sender = wallet.sender(keys.secretKey);
     const amountIn = toNano(TON_VALUE); //TON value
