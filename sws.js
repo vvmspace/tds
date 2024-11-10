@@ -97,6 +97,10 @@ const processWallet = async (mnemonic, walletAddress, jetton) => {
     const amountIn = toNano(TON_VALUE); //TON value
 
 
+    if (balance - minBalance < amountIn) {
+        console.log(`Not enough balance: ${balance - minBalance} of ${amountIn}`);
+        process.exit(0);
+    }
     await tonVault.sendSwap(sender, {
         poolAddress: pool.address,
         amount: amountIn,
